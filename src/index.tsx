@@ -1,12 +1,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Provider } from 'react-redux';
+import {Provider} from 'react-redux';
 import configureStore from './store';
 import './index.css';
-import Game from './game';
 import * as serviceWorker from './serviceWorker';
 import {Store} from "redux";
 import {RootState} from "./reducers";
+import App from "./App";
 
 interface Props {
     store: Store<RootState>;
@@ -15,7 +15,7 @@ interface Props {
 const Root: React.FC<Props> = props => {
     return (
         <Provider store={props.store}>
-            <Game />
+            <App />
         </Provider>
     )
 };

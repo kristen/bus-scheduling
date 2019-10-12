@@ -1,0 +1,5 @@
+.bus {
+    border-bottom: 1px solid lightgrey;
+    height: 35px;
+    position: relative;
+}

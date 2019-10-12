@@ -1,0 +1,8 @@
+.trip {
+    height: 25px;
+    margin: 5px 0;
+    border: 1px solid;
+    position: absolute;
+    text-align: center;
+    line-height: 25px;
+}

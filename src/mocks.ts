@@ -4,5 +4,6 @@ export const mockRootState: RootState = {
     board: {
         squares: [],
         xIsNext: true,
-    }
+    },
+    schedule: [],
 };
