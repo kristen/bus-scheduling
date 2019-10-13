@@ -1,13 +1,15 @@
-import React from 'react';
+import React, {MouseEventHandler} from 'react';
 import "./index.css";
 
 interface Props {
     children?: React.ReactNode;
+    onClick: MouseEventHandler<HTMLDivElement>;
 }
 
-const Bus: React.FC<Props> = ({children}) => {
+const Bus: React.FC<Props> = ({children, onClick}) => {
     return (
-        <div className="bus">
+        <div className="bus"
+             onClick={onClick}>
             {children}
         </div>
     )

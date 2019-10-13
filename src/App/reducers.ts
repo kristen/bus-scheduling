@@ -1,15 +1,21 @@
+import * as actions from "./actions";
 import {BusScheduleActions} from "./actions";
 import {getType} from "typesafe-actions";
-import * as actions from './actions';
+import {combineReducers} from "redux";
+
+export interface BusSchedule {
+    trips: TripDetails[];
+}
 
 export interface TripDetails {
     id: number;
     startTime: number;
     endTime: number;
-    selected?: boolean;
+    selected: boolean;
+    busId: string;
 }
 
-const initialSchedule: TripDetails[] = [
+const initialTripDetails: TripDetails[] = [
     { "id": 1, "startTime": 30, "endTime": 150 },
     { "id": 2, "startTime": 180, "endTime": 300 },
     { "id": 3, "startTime": 330, "endTime": 450 },
@@ -19,15 +25,29 @@ const initialSchedule: TripDetails[] = [
     { "id": 7, "startTime": 400, "endTime": 490 },
     { "id": 8, "startTime": 80, "endTime": 240 },
     { "id": 9, "startTime": 280, "endTime": 430 }
-];
+].map(trip => ({...trip, selected: false, busId: trip.id.toString()}));
 
-export const schedule = (state: TripDetails[] = initialSchedule, action: BusScheduleActions): TripDetails[] => {
+export const trips = (state: TripDetails[] = initialTripDetails, action: BusScheduleActions): TripDetails[] => {
     switch (action.type) {
         case getType(actions.selectTrip):
-            const {tripId} = action.payload;
             return state.map(trip => {
-                if (trip.id === tripId) {
+                if (trip.id === action.payload.tripId) {
                     return {...trip, selected: !trip.selected};
+                }
+                return {...trip, selected: false};
+            });
+        case getType(actions.changeBus):
+            const {busId} = action.payload;
+            const tripsOnBus = state.filter(trip => trip.busId === busId);
+            return state.map(trip => {
+                if (trip.selected) {
+                    // make sure trip doesn't collide with trip already on bus
+                    const isNotOverlap = ({startTime, endTime}: TripDetails) => {
+                        return trip.startTime > endTime || trip.endTime < startTime;
+                    };
+                    if (tripsOnBus.every(isNotOverlap)) {
+                        return {...trip, selected: false, busId };
+                    }
                 }
                 return {...trip, selected: false};
             });
@@ -35,3 +55,7 @@ export const schedule = (state: TripDetails[] = initialSchedule, action: BusSche
             return state;
     }
 };
+
+export default combineReducers({
+    trips,
+})
