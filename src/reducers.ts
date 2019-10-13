@@ -1,13 +1,11 @@
-import { combineReducers } from "redux";
-import board, {BoardState} from './board/reducers';
-import {schedule, TripDetails} from "./App/reducers";
+import {combineReducers} from "redux";
+import {BusSchedule} from "./App/reducers";
+import schedule from './App/reducers';
 
 export interface RootState {
-    board: BoardState;
-    schedule: TripDetails[];
+    schedule: BusSchedule;
 }
 
 export default combineReducers<RootState>({
-    board,
-    schedule
+    schedule,
 });
