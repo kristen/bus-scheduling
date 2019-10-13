@@ -23,7 +23,7 @@ const App: React.FC<Props> = ({groupedTrips, selectTrip, changeBus}) => {
                 {groupedTrips[busId].map(trip =>
                     <Trip {...trip}
                           key={trip.id}
-                          onClick={() => selectTrip(trip.id)} />
+                          onClick={() => selectTrip(busId, trip.id)} />
                 )}
             </Bus>
         )}
@@ -35,7 +35,7 @@ const mapStateToProps = (state: RootState) => ({
 });
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
-    selectTrip: (tripId: number) => dispatch(selectTrip(tripId)),
+    selectTrip: (busId: string, tripId: number) => dispatch(selectTrip(busId, tripId)),
     changeBus: (busId: string) => dispatch(changeBus(busId)),
 });
 

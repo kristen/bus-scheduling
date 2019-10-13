@@ -1,8 +1,9 @@
 import {ActionType, createStandardAction} from "typesafe-actions";
 
 export const selectTrip = createStandardAction('bus-schedule/SELECT_TRIP')
-    .map((tripId: number) => ({
+    .map((busId: string, tripId: number) => ({
         payload: {
+            busId,
             tripId,
         }
     }));
