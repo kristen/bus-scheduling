@@ -1,41 +1,53 @@
-import React from 'react';
+import React, {DragEvent} from 'react';
 import Bus from "../Bus";
 import {connect} from "react-redux";
 import {RootState} from "../reducers";
-import {getSchedule} from "./selectors";
+import {getGroupedTrips, GroupedTrips} from "./selectors";
 import Trip from "../Trip";
-import {TripDetails} from "./reducers";
 import "./index.css";
 import {Dispatch} from "redux";
-import {selectTrip} from "./actions";
+import {changeBus, moveTrip, selectTrip} from "./actions";
 
 interface OwnProps {
-    schedule: TripDetails[];
+    groupedTrips: GroupedTrips;
 }
 
 type Props = OwnProps & ReturnType<typeof mapDispatchToProps>;
 
-const App: React.FC<Props> = ({schedule, selectTrip}) => {
-    return (
-        <div>
-            <h1>Bus Scheduling</h1>
-            {schedule.map(trip => {
-                return (
-                    <Bus>
-                        <Trip {...trip} onClick={() => selectTrip(trip.id)} />
-                    </Bus>
-                )
-            })}
-        </div>
-    )
+const App: React.FC<Props> = ({groupedTrips, selectTrip, moveTrip, changeBus}) => {
+    const DRAG_EVENT_DATA = 'tripId';
+    const handleDragStart = (event: DragEvent<HTMLDivElement>, tripId: number) => {
+        event.dataTransfer.setData(DRAG_EVENT_DATA, tripId.toString());
+        moveTrip(tripId);
+    };
+    const handleDrop = (event: DragEvent<HTMLDivElement>, busId: string) => {
+        const tripId = event.dataTransfer.getData(DRAG_EVENT_DATA);
+        changeBus(parseInt(tripId), busId);
+    };
+    return (<div>
+        <h1>Bus Scheduling</h1>
+        {Object.keys(groupedTrips).map(busId =>
+            <Bus key={busId}
+                 onDrop={event => handleDrop(event, busId)}>
+                {groupedTrips[busId].map(trip =>
+                    <Trip {...trip}
+                          key={trip.id}
+                          onClick={() => selectTrip(trip.id)}
+                          onDragStart={event => handleDragStart(event, trip.id)} />
+                )}
+            </Bus>
+        )}
+    </div>)
 };
 
 const mapStateToProps = (state: RootState) => ({
-    schedule: getSchedule(state),
+    groupedTrips: getGroupedTrips(state),
 });
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
-    selectTrip: (id: number) => dispatch(selectTrip(id)),
+    selectTrip: (tripId: number) => dispatch(selectTrip(tripId)),
+    moveTrip: (tripId: number) => dispatch(moveTrip(tripId)),
+    changeBus: (tripId: number, busId: string) => dispatch(changeBus(tripId, busId)),
 });
 
 export default connect(

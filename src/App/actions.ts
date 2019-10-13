@@ -1,9 +1,25 @@
 import {ActionType, createStandardAction} from "typesafe-actions";
 
-export const selectTrip = createStandardAction('bus-schedule/SELECT_TRIP').map((id: number) => ({
-    payload: {
-        tripId: id,
-    }
-}));
+export const selectTrip = createStandardAction('bus-schedule/SELECT_TRIP')
+    .map((tripId: number) => ({
+        payload: {
+            tripId,
+        }
+    }));
 
-export type BusScheduleActions = ActionType<typeof selectTrip>;
+export const moveTrip = createStandardAction('bus-schedule/MOVE_TRIP')
+    .map((tripId: number) => ({
+        payload: {
+            tripId,
+        }
+    }));
+
+export const changeBus = createStandardAction('bus-schedule/CHANGE_BUS')
+    .map((tripId: number, busId: string) => ({
+        payload: {
+            tripId,
+            busId,
+        }
+    }));
+
+export type BusScheduleActions = ActionType<typeof selectTrip | typeof moveTrip | typeof changeBus>;
