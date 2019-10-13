@@ -1,17 +1,23 @@
-import React from 'react';
+import React, {MouseEventHandler} from 'react';
 import "./index.css";
 import {TripDetails} from "../App/reducers";
 
+interface OwnProps {
+    onClick: MouseEventHandler<HTMLDivElement>
+}
 
-const Trip: React.FC<TripDetails> = ({id, startTime, endTime}) => {
+type Props = TripDetails & OwnProps;
+
+const Trip: React.FC<Props> = ({id, startTime, endTime, selected, onClick}) => {
+    const styles = {
+        width: `${endTime - startTime}px`,
+        left: `${startTime}px`,
+    };
+    const classNames = `trip ${selected ? 'selected' : ''}`;
     return (
-        <div className="trip"
-            style={
-                {
-                    width: `${endTime - startTime}px`,
-                    left: `${startTime}px`
-                }
-            }>
+        <div className={classNames}
+             onClick={onClick}
+             style={styles}>
             {id}
         </div>
     )

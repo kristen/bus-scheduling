@@ -1,7 +1,12 @@
+import {BusScheduleActions} from "./actions";
+import {getType} from "typesafe-actions";
+import * as actions from './actions';
+
 export interface TripDetails {
     id: number;
     startTime: number;
     endTime: number;
+    selected?: boolean;
 }
 
 const initialSchedule: TripDetails[] = [
@@ -16,6 +21,17 @@ const initialSchedule: TripDetails[] = [
     { "id": 9, "startTime": 280, "endTime": 430 }
 ];
 
-export const schedule = (state: TripDetails[] = initialSchedule): TripDetails[] => {
-    return state;
+export const schedule = (state: TripDetails[] = initialSchedule, action: BusScheduleActions): TripDetails[] => {
+    switch (action.type) {
+        case getType(actions.selectTrip):
+            const {tripId} = action.payload;
+            return state.map(trip => {
+                if (trip.id === tripId) {
+                    return {...trip, selected: !trip.selected};
+                }
+                return {...trip, selected: false};
+            });
+        default:
+            return state;
+    }
 };

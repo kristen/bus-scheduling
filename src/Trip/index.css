@@ -5,4 +5,8 @@
     position: absolute;
     text-align: center;
     line-height: 25px;
+    cursor: pointer;
+}
+.trip.selected {
+    background-color: lightgrey;
 }

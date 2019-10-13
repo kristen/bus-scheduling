@@ -6,19 +6,23 @@ import {getSchedule} from "./selectors";
 import Trip from "../Trip";
 import {TripDetails} from "./reducers";
 import "./index.css";
+import {Dispatch} from "redux";
+import {selectTrip} from "./actions";
 
-interface Props {
+interface OwnProps {
     schedule: TripDetails[];
 }
 
-const App: React.FC<Props> = ({schedule}) => {
+type Props = OwnProps & ReturnType<typeof mapDispatchToProps>;
+
+const App: React.FC<Props> = ({schedule, selectTrip}) => {
     return (
         <div>
             <h1>Bus Scheduling</h1>
             {schedule.map(trip => {
                 return (
                     <Bus>
-                        <Trip {...trip} />
+                        <Trip {...trip} onClick={() => selectTrip(trip.id)} />
                     </Bus>
                 )
             })}
@@ -30,7 +34,12 @@ const mapStateToProps = (state: RootState) => ({
     schedule: getSchedule(state),
 });
 
+const mapDispatchToProps = (dispatch: Dispatch) => ({
+    selectTrip: (id: number) => dispatch(selectTrip(id)),
+});
+
 export default connect(
-    mapStateToProps
+    mapStateToProps,
+    mapDispatchToProps
 )(App);
 
