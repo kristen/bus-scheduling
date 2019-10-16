@@ -2,10 +2,9 @@ import * as actions from "./actions";
 import {BusScheduleActions} from "./actions";
 import {getType} from "typesafe-actions";
 import {combineReducers} from "redux";
-import {GroupedTrips} from "./selectors";
 
 export interface BusSchedule {
-    groupedTrips: GroupedTrips;
+    groupedTrips: TripDetails[][];
 }
 
 export interface TripDetails {
@@ -15,7 +14,7 @@ export interface TripDetails {
     selected: boolean;
 }
 
-const initialGroupedTrips: GroupedTrips = [
+const initialGroupedTrips: TripDetails[][] = [
     { "id": 1, "startTime": 30, "endTime": 150 },
     { "id": 2, "startTime": 180, "endTime": 300 },
     { "id": 3, "startTime": 330, "endTime": 450 },
@@ -26,69 +25,59 @@ const initialGroupedTrips: GroupedTrips = [
     { "id": 8, "startTime": 80, "endTime": 240 },
     { "id": 9, "startTime": 280, "endTime": 430 }
 ].reduce((acc, trip) => {
-    acc[trip.id] = [{...trip, selected: false}];
+    acc.push([{...trip, selected: false}]);
     return acc;
-}, {} as GroupedTrips);
+}, [] as TripDetails[][]);
 
-const selectTripForBus = (state: GroupedTrips, busId: string, tripId: number): GroupedTrips => {
-    const {updatedState, isTripSelected} = Object.keys(state).reduce((acc, busId) => {
-        acc.updatedState[busId] = state[busId].map(trip => {
+const selectTripForBus = (state: TripDetails[][], busId: number, tripId: number): TripDetails[][] => {
+    const {updatedState, isTripSelected} = state.reduce((acc, schedule, index) => {
+        acc.updatedState[index] = state[index].map(trip => {
             if (trip.id === tripId) {
-                return {...trip, selected: !trip.selected};
+                const updatedTrip = {...trip, selected: !trip.selected};
+                acc.isTripSelected = updatedTrip.selected;
+                return updatedTrip;
             }
             return {...trip, selected: false};
         });
-        if (!acc.isTripSelected) {
-            acc.isTripSelected = acc.updatedState[busId].some(trip => trip.selected)
-        }
         return acc;
-    }, { updatedState: {} as GroupedTrips, isTripSelected: false });
-    if (isTripSelected) {
-        // if a trip is selected, add another bus route
-        const busIds = Object.keys(state).map(busId => parseInt(busId)).sort((a, b) => a - b);
-        const largestBusId = busIds[busIds.length - 1];
-        const provisionedBusId = (largestBusId ? largestBusId : 0) + 1;
-        return {...updatedState, [provisionedBusId]: [] };
+    }, { updatedState: [] as TripDetails[][], isTripSelected: false });
+    if (isTripSelected && updatedState.every(schedule => schedule.length)) {
+        // if a trip is selected & no other empty bus schedule, add another bus route
+        return [...updatedState, []];
     } else {
-        return {...updatedState };
+        return updatedState.filter(schedule => schedule &&  schedule.length);
     }
 };
 
-const changeToBus = (state: GroupedTrips, toBusId: string): GroupedTrips => {
-    const tripsOnBus = state[toBusId] || [];
-    const {currentBusId, selectedTrip, canMoveTrip} = Object.keys(state)
-        .reduce<{currentBusId: string|undefined, selectedTrip: TripDetails|undefined, canMoveTrip: boolean}>((acc, busId) => {
-        const selectedTrip = state[busId].find(trip => trip.selected);
-        if (selectedTrip) {
-            const canMoveTrip = tripsOnBus.every(({startTime, endTime}) => {
-                return selectedTrip.startTime > endTime || selectedTrip.endTime < startTime;
-            });
-            return { currentBusId: busId, selectedTrip, canMoveTrip };
-        }
-        return acc;
-    }, {currentBusId: undefined, selectedTrip: undefined, canMoveTrip: false});
-
-    if (currentBusId && selectedTrip && canMoveTrip) {
-        // make sure trip doesn't collide with trip already on bus
-        const updatedTrip = {...selectedTrip, selected: false };
-        const updatedToBus = [...tripsOnBus, updatedTrip];
-        const updatedCurrentBus = state[currentBusId].filter(trip => trip.id !== selectedTrip.id);
-        return Object.keys(state).reduce((acc, busId) => {
-            if (busId === currentBusId) {
-                if (updatedCurrentBus.length) {
-                    acc[busId] = updatedCurrentBus;
-                }
-            } else if (busId !== toBusId && state[busId].length) {
-                acc[busId] = state[busId];
+const changeToBus = (state: TripDetails[][], toBusId: number): TripDetails[][] => {
+    // remove bus from original location
+    const {selectedTrip, updatedSchedule} = state.reduce((acc, schedule, index) => {
+        // find selected trip
+        const selectedTrip = schedule.find(trip => trip.selected);
+        const canMoveTrip = (trip: TripDetails) => state[toBusId].every(({startTime, endTime}) => {
+            return trip.startTime > endTime || trip.endTime < startTime;
+        });
+        if (selectedTrip && canMoveTrip(selectedTrip)) {
+            acc.selectedTrip = {...selectedTrip, selected: false};
+            // take it out of current bus
+            const updatedSchedule = schedule.filter(trip => trip.id !== selectedTrip.id);
+            // make sure updatedSchedule has length before putting in acc
+            if (updatedSchedule.length) {
+                acc.updatedSchedule[index] = updatedSchedule;
             }
-            return acc;
-        }, {[toBusId]: updatedToBus} as GroupedTrips);
-    } else {
-        return state;
-    }
+            return acc
+        } else {
+            acc.updatedSchedule[index] = schedule.map(trip => ({...trip, selected: false}));
+        }
+        return acc;
+    }, {selectedTrip: undefined as TripDetails|undefined, updatedSchedule: [] as TripDetails[][]});
+
+    // insert it into new bus and flatten out empty bus schedules
+    if (selectedTrip) updatedSchedule[toBusId].push(selectedTrip);
+    return updatedSchedule.filter(schedule => schedule && schedule.length);
 };
 
-export const groupedTrips = (state: GroupedTrips = initialGroupedTrips, action: BusScheduleActions): GroupedTrips => {
+export const groupedTrips = (state: TripDetails[][] = initialGroupedTrips, action: BusScheduleActions): TripDetails[][] => {
     switch (action.type) {
         case getType(actions.selectTrip):
             return selectTripForBus(state, action.payload.busId, action.payload.tripId);

@@ -2,14 +2,15 @@ import React from 'react';
 import Bus from "../Bus";
 import {connect} from "react-redux";
 import {RootState} from "../reducers";
-import {getGroupedTrips, GroupedTrips} from "./selectors";
+import {getGroupedTrips} from "./selectors";
 import Trip from "../Trip";
 import "./index.css";
 import {Dispatch} from "redux";
 import {changeBus, selectTrip} from "./actions";
+import {TripDetails} from "./reducers";
 
 interface OwnProps {
-    groupedTrips: GroupedTrips;
+    groupedTrips: TripDetails[][];
 }
 
 type Props = OwnProps & ReturnType<typeof mapDispatchToProps>;
@@ -17,13 +18,13 @@ type Props = OwnProps & ReturnType<typeof mapDispatchToProps>;
 const App: React.FC<Props> = ({groupedTrips, selectTrip, changeBus}) => {
     return (<div>
         <h1>Bus Scheduling</h1>
-        {Object.keys(groupedTrips).map(busId =>
-            <Bus key={busId}
-                 onClick={() => changeBus(busId)}>
-                {groupedTrips[busId].map(trip =>
+        {groupedTrips.map((schedule, index) =>
+            <Bus key={index}
+                 onClick={() => changeBus(index)}>
+                {schedule.map(trip =>
                     <Trip {...trip}
                           key={trip.id}
-                          onClick={() => selectTrip(busId, trip.id)} />
+                          onClick={() => selectTrip(index, trip.id)} />
                 )}
             </Bus>
         )}
@@ -35,8 +36,8 @@ const mapStateToProps = (state: RootState) => ({
 });
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
-    selectTrip: (busId: string, tripId: number) => dispatch(selectTrip(busId, tripId)),
-    changeBus: (busId: string) => dispatch(changeBus(busId)),
+    selectTrip: (busId: number, tripId: number) => dispatch(selectTrip(busId, tripId)),
+    changeBus: (busId: number) => dispatch(changeBus(busId)),
 });
 
 export default connect(
