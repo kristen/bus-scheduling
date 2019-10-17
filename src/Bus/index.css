@@ -1,9 +1,13 @@
 .bus {
-    border-bottom: 1px solid lightgrey;
-    height: 35px;
-    display: grid;
     --bus-id-width: 70px;
     --schedule-width: 90px;
+    --bus-border: 1px solid lightgrey;
+    border-bottom: var(--bus-border);
+    height: 35px;
+    display: grid;
+}
+.bus:first-child {
+    border-top: var(--bus-border);
 }
 .existing-bus {
     grid-template-columns: var(--bus-id-width) var(--schedule-width) auto;
@@ -25,5 +29,5 @@
     font-weight: bold;
 }
 .bus .trips {
-    border-left: 1px solid lightgrey;
+    border-left: var(--bus-border);
 }

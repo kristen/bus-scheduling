@@ -29,18 +29,20 @@ const getScheduleTimes = (schedule: TripDetails[]): ScheduleTimes => {
 const App: React.FC<Props> = ({groupedTrips, selectTrip, changeBus}) => {
     return (<div>
         <h1>Bus Scheduling</h1>
-        {groupedTrips.map((schedule, index) =>
-            <Bus key={index}
-                 busId={index}
-                 {...getScheduleTimes(schedule)}
-                 onClick={() => changeBus(index)}>
-                {schedule.map(trip =>
-                    <Trip {...trip}
-                          key={trip.id}
-                          onClick={() => selectTrip(index, trip.id)} />
-                )}
-            </Bus>
-        )}
+        <div>
+            {groupedTrips.map((schedule, index) =>
+                <Bus key={index}
+                     busId={index}
+                     {...getScheduleTimes(schedule)}
+                     onClick={() => changeBus(index)}>
+                    {schedule.map(trip =>
+                        <Trip {...trip}
+                              key={trip.id}
+                              onClick={() => selectTrip(index, trip.id)} />
+                    )}
+                </Bus>
+            )}
+        </div>
     </div>)
 };
 
