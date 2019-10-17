@@ -1,5 +1,29 @@
 .bus {
     border-bottom: 1px solid lightgrey;
     height: 35px;
+    display: grid;
+    --bus-id-width: 70px;
+    --schedule-width: 90px;
+}
+.existing-bus {
+    grid-template-columns: var(--bus-id-width) var(--schedule-width) auto;
+}
+.new-bus {
+    grid-template-columns: calc(var(--bus-id-width) + var(--schedule-width)) auto;
+}
+.bus:nth-child(odd) {
+    background: #f4f4f4;
+}
+.bus .schedule-time {
+    padding: 9px 0px;
+    color: grey;
+    font-size: 12px;
     position: relative;
+}
+.bus .bus-id {
+    padding: 8px 10px;
+    font-weight: bold;
+}
+.bus .trips {
+    border-left: 1px solid lightgrey;
 }

@@ -1,3 +1,6 @@
+.trips {
+    position: relative;
+}
 .trip {
     height: 25px;
     margin: 5px 0;

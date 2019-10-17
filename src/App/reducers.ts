@@ -8,9 +8,9 @@ export interface BusSchedule {
 }
 
 export interface TripDetails {
-    id: number;
-    startTime: number;
-    endTime: number;
+    id: number;        // an identifier for this trip
+    startTime: number; // the number of minutes after midnight that this trip starts
+    endTime: number;   // the number of minutes after midnight that this trip ends
     selected: boolean;
 }
 
