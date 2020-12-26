@@ -6,7 +6,8 @@ import {getGroupedTrips,} from "./selectors";
 import Trip from "../Trip";
 import {Dispatch} from "redux";
 import {changeBus, selectTrip} from "./actions";
-import {TripDetails} from "./reducers";
+import {TripDetails, TripType} from "./reducers";
+import PlacementTrip from "../PlacementTrip";
 
 interface OwnProps {
     groupedTrips: TripDetails[][];
@@ -33,12 +34,14 @@ const App: React.FC<Props> = ({groupedTrips, selectTrip, changeBus}) => {
             {groupedTrips.map((schedule, index) =>
                 <Bus key={index}
                      busId={index}
-                     {...getScheduleTimes(schedule)}
-                     onClick={() => changeBus(index)}>
+                     {...getScheduleTimes(schedule)}>
                     {schedule.map(trip =>
+                        trip.type === TripType.ACTUAL ?
                         <Trip {...trip}
                               key={trip.id}
-                              onClick={() => selectTrip(index, trip.id)} />
+                              onClick={() => selectTrip(index, trip.id)} /> :
+                            <PlacementTrip {...trip}
+                                           onClick={() => changeBus(index)}/>
                     )}
                 </Bus>
             )}
